@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 pygame.init()
 
@@ -241,6 +242,9 @@ class Tomato:
 
     def __init__(self, x, y):
 
+        self.shake_x = 0
+        self.shake_y = 0
+
         self.rect = pygame.Rect(x, y, 64, 64)
 
         self.start_x = x
@@ -284,11 +288,22 @@ class Tomato:
 
         if not self.exploding:
 
+            speed = 8
+
+            if self.countdown_started:
+
+                if self.countdown < 60:
+                    speed = 4
+
+                if self.countdown < 30:
+                    speed = 2
+
             self.idle_timer += 1
 
-            if self.idle_timer >= 8:
+            if self.idle_timer >= speed:
 
                 self.idle_timer = 0
+
                 self.idle_frame += 1
                 self.idle_frame %= len(idle_frames)
 
@@ -298,8 +313,17 @@ class Tomato:
                 self.countdown_started = True
 
         if self.countdown_started and not self.exploding:
+            # tremor
+            self.shake_x = random.randint(-3, 3)
+            self.shake_y = random.randint(-2, 2)
 
             self.countdown -= 1
+
+            # acelera a animação conforme a explosão se aproxima
+            if self.countdown < 60:
+                idle_speed = 4
+            else:
+                idle_speed = 8
 
             if self.countdown <= 0:
 
