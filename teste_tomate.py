@@ -265,20 +265,22 @@ class Tomato:
         self.explosion_frame = 0
         self.explosion_timer = 0
 
-        self.explosion_radius = 80
+        self.explosion_radius = 140
 
     def update(self, player):
 
         if not self.alive:
             return
 
-        self.rect.x += self.speed * self.direction
+        if not self.countdown_started:
 
-        if self.rect.x > self.start_x + self.patrol_distance:
-            self.direction = -1
+            self.rect.x += self.speed * self.direction
 
-        if self.rect.x < self.start_x - self.patrol_distance:
-            self.direction = 1
+            if self.rect.x > self.start_x + self.patrol_distance:
+                self.direction = -1
+
+            if self.rect.x < self.start_x - self.patrol_distance:
+                self.direction = 1
 
         if not self.exploding:
 
