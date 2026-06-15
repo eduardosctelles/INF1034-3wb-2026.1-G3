@@ -9,9 +9,11 @@ pulando = False
 altura = -5
 posicaoSheet = 0
 pos_x = 0
-pos_y = 0
+pos_y = 515
 curr_frame = 0
 anim_time = 0
+fundo = pygame.image.load("imagem-fundo-selva.png")
+
 
 pygame.init()  # ← MOVIDO PARA ANTES DO image.load
 
@@ -33,7 +35,8 @@ for f in frames_correndo:
 virado = False
 gordo_frames = frames_parado
 
-screen = pygame.display.set_mode((700, 500))
+screen = pygame.display.set_mode((1280, 720))
+background = pygame.transform.scale(fundo, (1280, 720))
 pygame.display.set_caption('Movimentação personagem')
 
 while True:
@@ -53,6 +56,7 @@ while True:
     clock.tick(60)
     dt = clock.get_time()
     keys = pygame.key.get_pressed()
+
 
     run_animation = False  # ← RESET a cada frame antes de verificar teclas
 
@@ -91,6 +95,6 @@ while True:
                 curr_frame = 0
             anim_time = 0
 
-    screen.fill((255, 255, 255))
+    screen.blit(background, (0, 0))
     screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))  # ← sem crop, frame direto
     pygame.display.update()
