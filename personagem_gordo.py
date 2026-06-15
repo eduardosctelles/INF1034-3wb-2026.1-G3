@@ -16,7 +16,7 @@ anim_time = 0
 pygame.init()  # ← MOVIDO PARA ANTES DO image.load
 
 frames_parado = []
-for i in range(1, 5):
+for i in range(2, 4):
     frames_parado.append(pygame.image.load(f'pasta_hero/gordo_0{i}.png'))
 
 frames_correndo = []
