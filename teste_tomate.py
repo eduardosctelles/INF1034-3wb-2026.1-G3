@@ -66,52 +66,6 @@ for col in range(4):
 print("Frames da explosão:", len(explosion_frames))
 
 # ==========================
-# GORDO SPRITESHEET
-# ==========================
-
-player_sheet = pygame.image.load("gordo.png").convert_alpha()
-
-PLAYER_FRAME_W = 74
-PLAYER_FRAME_H = 96
-
-WALK_FRAMES = 6 
-DEATH_FRAMES = 10
-
-def get_player_frame(col, row):
-
-    frame = pygame.Surface(
-        (PLAYER_FRAME_W, PLAYER_FRAME_H),
-        pygame.SRCALPHA
-    )
-
-    frame.blit(
-        player_sheet,
-        (0, 0),
-        (
-            col * PLAYER_FRAME_W,
-            row * PLAYER_FRAME_H,
-            PLAYER_FRAME_W,
-            PLAYER_FRAME_H
-        )
-    )
-
-    return frame
-
-walk_frames = []
-
-for col in range(WALK_FRAMES):
-    walk_frames.append(
-        get_player_frame(col, 0)
-    )
-
-death_frames = []
-
-for col in range(DEATH_FRAMES):
-    death_frames.append(
-        get_player_frame(col, 2)
-    )
-
-# ==========================
 # PLAYER
 # ==========================
 
@@ -132,106 +86,42 @@ class Player:
 
         self.dead = False
 
-        self.direction = 1
-
-        self.frame = 0
-        self.anim_timer = 0
-
-        self.death_frame = 0
-
     def update(self):
 
         if self.dead:
-
-            self.anim_timer += 1
-
-            if self.anim_timer >= 8:
-
-                self.anim_timer = 0
-
-                if self.death_frame < len(death_frames) - 1:
-                    self.death_frame += 1
-
             return
 
         keys = pygame.key.get_pressed()
 
-        moving = False
-
         if keys[pygame.K_a]:
-
             self.rect.x -= self.speed
-            self.direction = -1
-            moving = True
 
         if keys[pygame.K_d]:
-
             self.rect.x += self.speed
-            self.direction = 1
-            moving = True
 
         if keys[pygame.K_SPACE] and self.on_ground:
-
             self.vel_y = self.jump_force
             self.on_ground = False
 
         self.vel_y += self.gravity
-
         self.rect.y += self.vel_y
 
         if self.rect.bottom >= GROUND_Y:
-
             self.rect.bottom = GROUND_Y
             self.vel_y = 0
             self.on_ground = True
 
-        if moving:
-
-            self.anim_timer += 1
-
-            if self.anim_timer >= 6:
-
-                self.anim_timer = 0
-                self.frame = 0
-
-        else:
-
-            self.frame = 0
-
     def draw(self, screen):
 
+        cor = (50, 150, 255)
+
         if self.dead:
+            cor = (120, 120, 120)
 
-            frame = death_frames[
-                min(
-                    self.death_frame,
-                    len(death_frames)-1
-                )
-            ]
-
-        else:
-
-            frame = walk_frames[self.frame]
-
-        frame = pygame.transform.scale(
-            frame,
-            (90, 120)
-        )
-
-        if self.direction == -1:
-
-            frame = pygame.transform.flip(
-                frame,
-                True,
-                False
-            )
-
-        screen.blit(
-            frame,
-            (
-                self.rect.centerx - 45,
-                self.rect.centery - 60
-            )
+        pygame.draw.rect(
+            screen,
+            cor,
+            self.rect
         )
 
 # ==========================
