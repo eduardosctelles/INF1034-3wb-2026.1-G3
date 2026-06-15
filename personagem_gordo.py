@@ -1,26 +1,42 @@
 # MOVIMENTACAO DO GORDO
-
 import pygame, sys
-from pygame.locals import QUIT,KEYDOWN
+from pygame.locals import QUIT, KEYDOWN
 
 clock = pygame.time.Clock()
-
 parado = True
-run_animation= False
+run_animation = False
 pulando = False
-
 altura = -5
 posicaoSheet = 0
 pos_x = 0
-pos_y = 0
+pos_y = 515
 curr_frame = 0
 anim_time = 0
-spritesheet = pygame.image.load('gordo.png')
-flip = pygame.transform.flip(spritesheet,True,False)
-gordo = spritesheet
+fundo = pygame.image.load("imagem-fundo-selva.png")
 
-pygame.init()
-screen = pygame.display.set_mode((700,500))
+
+pygame.init()  # ← MOVIDO PARA ANTES DO image.load
+
+frames_parado = []
+for i in range(2, 4):
+    frames_parado.append(pygame.image.load(f'pasta_hero/gordo_0{i}.png'))
+
+frames_correndo = []
+for i in range(5, 14):
+    frames_correndo.append(pygame.image.load(f'pasta_hero/gordo_0{i}.png'))
+
+flip_parado = []
+for f in frames_parado:
+    flip_parado.append(pygame.transform.flip(f, True, False))
+
+flip_correndo = []
+for f in frames_correndo:
+    flip_correndo.append(pygame.transform.flip(f, True, False))
+virado = False
+gordo_frames = frames_parado
+
+screen = pygame.display.set_mode((1280, 720))
+background = pygame.transform.scale(fundo, (1280, 720))
 pygame.display.set_caption('Movimentação personagem')
 
 while True:
@@ -29,66 +45,56 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:
-            if event.key == pygame.K_a: #Mudar a direção do boneco se for para a esquerda ( ele olha pra esquerda )
-                gordo = flip
-            if event.key == pygame.K_d: #Muda a direção de volta dse ele tiver olhando pro outro lado
-                gordo = spritesheet
-            if event.key == pygame.K_SPACE and pulando == False: #Espaço pra pular / nao pode fazer double jump
+            if event.key == pygame.K_a:
+                virado = True
+            if event.key == pygame.K_d:
+                virado = False
+            if event.key == pygame.K_SPACE and pulando == False:
                 pulando = True
-                altura = -5 #altura do pulo
+                altura = -5
 
     clock.tick(60)
     dt = clock.get_time()
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_d]: #D para ir pra direita
-        pos_x+=2
+
+    run_animation = False  # ← RESET a cada frame antes de verificar teclas
+
+    if keys[pygame.K_d]:
+        pos_x += 2
         run_animation = True
-    
-    if keys[pygame.K_a]: #A para ir pra esquerda
-        pos_x-=2
+    if keys[pygame.K_a]:
+        pos_x -= 2
         run_animation = True
-    
-    else: # Se não tá indo pra direita ou esquerda, ele ta parado
+
+    if not run_animation:  # ← era "else" ligado só ao K_a
         parado = True
-    
 
-    if run_animation: #animação pra correr
+    if run_animation:
         parado = False
-        posicaoSheet = 192
-        
-        anim_time+=dt
-        anim_time_sec = anim_time/500
-        if anim_time_sec > 0.3:
-            curr_frame+=1
-            if curr_frame > 10:
+        nova_lista = flip_correndo if virado else frames_correndo
+        if nova_lista != gordo_frames:  # ← trocou de animação?
+            curr_frame = 0              # ← reseta o frame
+        gordo_frames = nova_lista
+        anim_time += dt
+        if anim_time / 500 > 0.3:
+            curr_frame += 1
+            if curr_frame >= len(gordo_frames):
                 curr_frame = 0
-                run_animation = False
-            anim_time = 0  
-    
-    if pulando: # animação do pulo
-        pos_y += altura #posição recebe a "altura"/velocidade que no inicio é negativa, então ela vai diminuindo cada vez mais
-        altura += 0.5 #enquanto os frames passam, a altura vai aumentando de valor, uma hora ela vira positiva
-                    # de 0.5 em 0.5, a altura aumenta e se adiciona a pos_y, o que faz com q ela aumente tbm chegando até 0
-    if pos_y >= 0: # quando pos_y = 0 = chao, o pulo acaba
-        pos_y = 0
-        pulando = False
-    
-    if parado: #parado, animação parada
-        posicaoSheet=0
-        #mudar a posição na sheet pra onde ele tem a animacao dele parado
-        anim_time+=dt
-        anim_time_sec = anim_time/1000
-        if anim_time_sec > 0.3:
-            curr_frame+=1
-            if curr_frame > 3:
-                curr_frame = 0
-                run_animation = False
-            anim_time = 0    
-            
-    #Desenho dos elementos 
-    screen.fill((255,255,255))
+            anim_time = 0
 
-    screen.blit(gordo,(pos_x,pos_y),(72*(curr_frame%3),posicaoSheet,60,60))
-    
+    if parado:
+        nova_lista = flip_parado if virado else frames_parado
+        if nova_lista != gordo_frames:  # ← trocou de animação?
+            curr_frame = 0              # ← reseta o frame
+        gordo_frames = nova_lista
+        anim_time += dt
+        if anim_time / 1000 > 0.3:
+            curr_frame += 1
+            if curr_frame >= len(gordo_frames):
+                curr_frame = 0
+            anim_time = 0
+
+    screen.blit(background, (0, 0))
+    screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))  # ← sem crop, frame direto
     pygame.display.update()
