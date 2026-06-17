@@ -105,43 +105,43 @@ class Carrot(pygame.sprite.Sprite):
         self.velocidade = 2
         self.direcao = 1 # 1 = direita, -1 = esquerda
 
-       self.estado = "walk"
+        self.estado = "walk"
 
-       self.frame = 0
-       self.anim_timer = 0
+        self.frame = 0
+        self.anim_timer = 0
 
-       self.morta = False
+        self.morta = False
 
-       self.image = self.walk_frames[0]
+        self.image = self.walk_frames[0]
 
-       carrot.update(player)
+        carrot.update(player)
 
-       distancia = abs(player.rect.centerx - self.rect.centerx)
+        distancia = abs(player.rect.centerx - self.rect.centerx)
 
-       if not self.morta:
+        if not self.morta:
           if distancia < 150:
              self.estado = "spin"
           else:
              self.estado = "walk"
 
-       self.anim_timer += 1
+        self.anim_timer += 1
 
-      if self.anim_timer >= 5:
-         self.anim_timer = 0
+        if self.anim_timer >= 5:
+           self.anim_timer = 0
 
-     if self.estado == "walk":
-        self.frame = (self.frame + 1) % len(self.walk_frames)
-        self.image = self.walk_frames[self.frame]
+           if self.estado == "walk":
+              self.frame = (self.frame + 1) % len(self.walk_frames)
+              self.image = self.walk_frames[self.frame]
 
-    elif self.estado == "spin":
-        self.frame = (self.frame + 1) % len(self.spin_frames)
-        self.image = self.spin_frames[self.frame]
+           elif self.estado == "spin":
+               self.frame = (self.frame + 1) % len(self.spin_frames)
+               self.image = self.spin_frames[self.frame]
 
-    elif self.estado == "dead":
-        if self.frame < len(self.death_frames)-1:
-            self.frame += 1
+           elif self.estado == "dead":
+              if self.frame < len(self.death_frames)-1:
+                self.frame += 1
 
-        self.image = self.death_frames[self.frame]
+              self.image = self.death_frames[self.frame]
         
     def update(self):
         # Lógica de andar de um lado para outro
