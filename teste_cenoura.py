@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         
         self.image = pygame.Surface((40, 60))
-        self.image.fill(0, 0, 255)
+        self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect(center=(400, 500))
         
         # Física e Movimentação
@@ -66,11 +66,38 @@ class Carrot(pygame.sprite.Sprite):
             self.sheet.fill(255, 0, 0) 
         
         # Configurações da Spritesheet
-        self.sprite_width = 50   # Ajuste para a largura do seu frame
-        self.sprite_height = 50  # Ajuste para a altura do seu frame
+        self.sprite_width = 64   # Ajuste para a largura do seu frame
+        self.sprite_height = 64  # Ajuste para a altura do seu frame
         self.image = self.sheet.subsurface((0, 0, self.sprite_width, self.sprite_height))
+        self.image = pygame.transform.scale(self.image, (128, 128))
         
         self.rect = self.image.get_rect(topleft=(x_inicial, 500))
+
+        walk_frames = []
+        
+        for linha in range(2):
+            for coluna in range(7):
+                frame = self.sheet.subsurface(
+                    (coluna * 64, linha * 64, 64, 64)
+                )
+                walk_frames.append(frame)
+        
+        spin_frames = []
+
+        for linha in [2, 3]:
+            for coluna in range(7):
+                frame = self.sheet.subsurface(
+                    (coluna * 64, linha * 64, 64, 64)
+                )
+                spin_frames.append(frame)
+        
+        death_frames = []
+
+        for coluna in range(7):
+                frame = self.sheet.subsurface(
+                    (coluna * 64, 5 * 64, 64, 64)
+                )
+                death_frames.append(frame)
         
         # Movimentação da Cenoura
         self.inicio_x = x_inicial
@@ -78,10 +105,6 @@ class Carrot(pygame.sprite.Sprite):
         self.velocidade = 2
         self.direcao = 1 # 1 = direita, -1 = esquerda
         
-        # Ataque
-        self.atacando = False
-        self.tempo_ataque = 0
-
     def update(self):
         # Lógica de andar de um lado para outro
         self.rect.x += self.velocidade * self.direcao
@@ -90,16 +113,7 @@ class Carrot(pygame.sprite.Sprite):
         elif self.rect.x <= self.inicio_x - self.distancia_maxima:
             self.direcao = 1
 
-        # Lógica de ataque e rotação (simulada mudando o estado ou frame)
-        if self.atacando:
-            self.tempo_ataque -= 1
-            if self.tempo_ataque <= 0:
-                self.atacando = False
-
-    def iniciar_ataque(self):
-        if not self.atacando:
-            self.atacando = True
-            self.tempo_ataque = 30 # Duração do ataque (em frames)
+        
 
 # Configurações Iniciais
 def resetar_jogo():
@@ -136,9 +150,9 @@ while True:
                 carrot.iniciar_ataque()
                 player.vivo = False
 
-    screen.fill(0, 0, 0)
+    screen.fill((0, 0, 0))
     
-    pygame.draw.rect(screen, 255, 255, 255, (0, 550, 800, 50))
+    pygame.draw.rect(screen, (255, 255, 255), (0, 550, 800, 50))
 
     grupo_sprites.draw(screen)
 
