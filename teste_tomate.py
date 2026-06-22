@@ -248,7 +248,7 @@ class Tomato:
 
             frame = idle_frames[self.idle_frame]
 
-            if self.direction == -1:
+            if self.direction == 1:
                 frame = pygame.transform.flip(
                     frame,
                     True,
