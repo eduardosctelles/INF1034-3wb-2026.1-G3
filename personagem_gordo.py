@@ -82,7 +82,7 @@ tom_shake_x = 0
 tom_shake_y = 0
 
 font_game_over = pygame.font.SysFont('Arial', 100, bold=True)
-texto_game_over = font_game_over.render("GAME OVER", True, (255, 255, 255))
+texto_game_over = font_game_over.render("HAM OVER", True, (255, 255, 255))
 
 while True:
 
