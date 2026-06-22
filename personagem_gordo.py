@@ -1,6 +1,8 @@
 # MOVIMENTACAO DO GORDO
 import pygame, sys
 from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN, MOUSEBUTTONUP
+import math
+import random
 
 clock = pygame.time.Clock()
 parado = True
@@ -129,7 +131,7 @@ while True:
                 curr_frame = 0
         anim_time = 0
         soco = False
-        
+
        #Segunda parte do colider 
        # collider_jogador = pygame.Rect(pos_x, pos_y, 64, 64) 
        #Terceira parte do colider 
@@ -137,7 +139,9 @@ while True:
        #    pos_x = old_pos_x
        #    pos_y = old_pos_y
 
+    tomato.update(player)
 
     screen.blit(background, (0, 0))
-    screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))  
+    screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))
+    tomato.draw(screen)
     pygame.display.update()
