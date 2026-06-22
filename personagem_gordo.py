@@ -68,6 +68,10 @@ while True:
         #     if event.button == 1:
         #         soco = True
 
+    #Primeira parte do colider
+    # old_pos_x = pos_x
+    # old_pos_y = pos_y
+
     clock.tick(60)
     dt = clock.get_time()
     keys = pygame.key.get_pressed()
@@ -126,7 +130,12 @@ while True:
         anim_time = 0
         soco = False
         
-        
+       #Segunda parte do colider 
+       # collider_jogador = pygame.Rect(pos_x, pos_y, 64, 64) 
+       #Terceira parte do colider 
+       # if collider_jogador.colliderect(collider_caixa):
+       #    pos_x = old_pos_x
+       #    pos_y = old_pos_y
 
 
     screen.blit(background, (0, 0))
