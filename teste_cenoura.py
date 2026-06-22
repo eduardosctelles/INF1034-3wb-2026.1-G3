@@ -99,7 +99,7 @@ class Carrot(pygame.sprite.Sprite):
         
         # Configura as dimensões da hitbox/imagem inicial
         self.image = pygame.transform.scale(self.walk_frames[0], (128, 128))
-        self.rect = self.image.get_rect(topleft=(x_inicial, 422)) # 550 - 128 = 422 para alinhar ao chão
+        self.rect = self.image.get_rect(topleft=(x_inicial, 450)) 
 
     def iniciar_ataque(self):
         if not self.morta:
