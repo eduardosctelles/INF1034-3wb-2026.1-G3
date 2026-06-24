@@ -54,6 +54,7 @@ while running:
         background = pygame.transform.scale(background,(WIDTH, HEIGHT))
         player.x = 0
 
+
     screen.blit(background, (0, 0))
 
     pygame.draw.rect(screen, (0, 100, 255), player)
