@@ -14,6 +14,7 @@ anim_time_aipo = 0
 spritesheet_aipo = pygame.image.load('AEvilery-Sheet.png')
 flip_aipo = pygame.transform.flip(spritesheet_aipo,True,False)
 aipo = flip_aipo
+collider_inimigos = []
 
 
 pygame.init()
@@ -34,6 +35,7 @@ while True:
     clock.tick(60)
     dt = clock.get_time()
     
+    collider_aipo = pygame.Rect(pos_x_aipo,pos_y_aipo,32,32)
 
     if animation_aipo :
         posicaoSheet_aipo = 0
@@ -48,7 +50,7 @@ while True:
           
     #Desenho dos elementos 
     screen.fill((255,255,255))
-
+    pygame.draw.rect(screen, (0, 0, 255), collider_aipo, 2)
     screen.blit(aipo,(pos_x_aipo,pos_y_aipo),(32*(curr_frame_aipo%13)+64,posicaoSheet_aipo,32,32))
 
     pygame.display.update()

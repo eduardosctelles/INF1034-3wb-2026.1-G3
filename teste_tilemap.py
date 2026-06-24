@@ -9,23 +9,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 background = pygame.image.load("imagem-fundo-selva.png").convert()
 
-background = pygame.transform.scale(
-    background,
-    (WIDTH, HEIGHT)
-)
+background = pygame.transform.scale(background,(WIDTH, HEIGHT))
 
 player = pygame.Rect(100, 530, 50, 80)
-
 GROUND_Y = 600
-
 vel_y = -8
-
 gravity = 0.5
-
 on_ground = False
-
 running = True
-
 move_timer = 0
 
 clock = pygame.time.Clock()
@@ -57,6 +48,11 @@ while running:
         player.bottom = GROUND_Y
         vel_y = 0
         on_ground = True
+
+    if player.x == 1280:
+        background = pygame.image.load("praia.jpg").convert()
+        background = pygame.transform.scale(background,(WIDTH, HEIGHT))
+        player.x = 0
 
     screen.blit(background, (0, 0))
 
