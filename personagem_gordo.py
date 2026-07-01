@@ -1,8 +1,11 @@
 import pygame, sys, math, random
 from pygame.locals import QUIT, KEYDOWN
 clock = pygame.time.Clock()
+import time
+
 pygame.init()
 parado = True
+aparece = False
 run_animation = False
 pulando = False
 soco = False
@@ -13,9 +16,11 @@ curr_frame = 0
 anim_time = 0
 virado = False
 game_over = False
+passou = False
 flash_timer = 0
 GROUND_Y = 515
 
+bolha = pygame.image.load("bolha_de_fala.png")
 fundo = pygame.image.load("imagem-fundo-selva.png")
 screen = pygame.display.set_mode((1280, 720))
 background = pygame.transform.scale(fundo, (1280, 720))
@@ -85,7 +90,6 @@ font_game_over = pygame.font.SysFont('Arial', 100, bold=True)
 texto_game_over = font_game_over.render("HAM OVER", True, (255, 255, 255))
 
 while True:
-
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -102,6 +106,11 @@ while True:
     clock.tick(60)
     dt = clock.get_time()
     keys = pygame.key.get_pressed()
+    old_pos_x = pos_x
+
+    #coisa da bolha do personagem
+    if dt == 16:
+        aparece = True
 
     if not game_over:
         run_animation = False
@@ -158,6 +167,7 @@ while True:
                     curr_frame = 0
                     soco = False
                     gordo_frames = flip_parado if virado else frames_parado
+        
         if pulando:
             pos_y += altura
             altura += 0.3
@@ -217,8 +227,18 @@ while True:
                     if tom_explosion_frame >= len(explosion_frames):
                         tom_alive = False
 
+    #Colider do personagem com a parede da esquerda
+    if pos_x < 0:
+        pos_x = old_pos_x
+
     screen.blit(background, (0, 0))
     screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))
+
+    if pos_x < 300 and passou == False and aparece == True:
+        screen.blit(bolha, (pos_x, pos_y - 300))
+    elif pos_x >= 300:
+        passou = True
+
     if tom_alive:
         if not tom_exploding:
             frame = idle_frames[tom_idle_frame]
