@@ -20,6 +20,7 @@ passou = False
 flash_timer = 0
 GROUND_Y = 515
 
+texto = pygame.font.Font("Lato-regular.ttf", 35)
 bolha = pygame.image.load("bolha_de_fala.png")
 fundo = pygame.image.load("imagem-fundo-selva.png")
 screen = pygame.display.set_mode((1280, 720))
@@ -86,6 +87,16 @@ tom_no_ar = False
 tom_shake_x = 0
 tom_shake_y = 0
 
+
+# Variáveis de tempo (em milissegundos)
+tempo_atual = 0
+tempo_troca = pygame.time.get_ticks() + 2000 # Troca após 2 segundos
+estado = 1 # Controla qual texto deve aparecer
+
+fonte_de_fala = texto.render("To cheio de fome...", True, (0, 0, 0))
+fonte_de_fala2 = texto.render("Não tem nada pra comer", True, (0, 0, 0))
+fonte_de_fala3 = texto.render("Queria um presunto...", True, (0, 0, 0))
+
 font_game_over = pygame.font.SysFont('Arial', 100, bold=True)
 texto_game_over = font_game_over.render("HAM OVER", True, (255, 255, 255))
 
@@ -108,6 +119,9 @@ while True:
     keys = pygame.key.get_pressed()
     old_pos_x = pos_x
 
+    screen.fill((255, 255, 255))
+
+    tempo_atual = pygame.time.get_ticks()
     #coisa da bolha do personagem
     if dt == 16:
         aparece = True
@@ -268,5 +282,23 @@ while True:
         screen.blit(overlay, (0, 0))
         texto_rect = texto_game_over.get_rect(center=(640, 360))
         screen.blit(texto_game_over, texto_rect)
+    
+     # Lógica de exibição sequencial
+    if pos_x < 300 and passou == False:
+        if estado == 1:
+            screen.blit(fonte_de_fala, (pos_x + 115, 360))
+            if tempo_atual >= tempo_troca:
+                estado = 2
+                tempo_troca = tempo_atual + 2000 # Próxima troca em 2 segundos
+        elif estado == 2:
+            screen.blit(fonte_de_fala2, (pos_x + 70, 360))
+            if tempo_atual >= tempo_troca:
+                estado = 3
+                tempo_troca = tempo_atual + 2000 # Retorna ao primeiro após 2 segundos
+        elif estado == 3:
+            screen.blit(fonte_de_fala3, (pos_x + 95, 360))
+            if tempo_atual >= tempo_troca:
+                estado = 1
+                tempo_troca = tempo_atual + 2000
 
     pygame.display.update()
