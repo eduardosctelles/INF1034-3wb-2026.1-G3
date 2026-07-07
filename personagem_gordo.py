@@ -1,10 +1,8 @@
 import pygame, sys, math, random
 from pygame.locals import QUIT, KEYDOWN
 clock = pygame.time.Clock()
-import time
 
 pygame.init()
-parado = True
 aparece = False
 run_animation = False
 pulando = False
@@ -22,9 +20,14 @@ GROUND_Y = 515
 
 texto = pygame.font.Font("Lato-regular.ttf", 35)
 bolha = pygame.image.load("bolha_de_fala.png")
-fundo = pygame.image.load("imagem-fundo-selva.png")
 screen = pygame.display.set_mode((1280, 720))
-background = pygame.transform.scale(fundo, (1280, 720))
+
+cenarios = [pygame.transform.scale(pygame.image.load("imagem-fundo-selva.png").convert(), (1280, 720)),pygame.transform.scale(pygame.image.load("praia.jpg").convert(), (1280, 720)),pygame.transform.scale(pygame.image.load("imagem_fundo_pantano.png").convert(), (1280, 720))]
+cenario = 0
+background = cenarios[cenario]
+fade = pygame.Surface((1280, 720))
+fade.fill((0, 0, 0))
+
 pygame.display.set_caption('Movimentação personagem')
 frames_parado = []
 
@@ -100,6 +103,33 @@ fonte_de_fala3 = texto.render("Queria um presunto...", True, (0, 0, 0))
 font_game_over = pygame.font.SysFont('Arial', 100, bold=True)
 texto_game_over = font_game_over.render("HAM OVER", True, (255, 255, 255))
 
+
+def troca_mapa():
+    global cenario, background, pos_x
+
+    for alpha in range(0, 256, 5):
+        screen.blit(background, (0, 0))
+        screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))
+        fade.set_alpha(alpha)
+        screen.blit(fade, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(10)
+
+    cenario += 1
+    if cenario >= len(cenarios):
+        cenario = 0
+    background = cenarios[cenario]
+    pos_x = 0
+
+    for alpha in range(255, -1, -5):
+        screen.blit(background, (0, 0))
+        screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))
+        fade.set_alpha(alpha)
+        screen.blit(fade, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(10)
+
+
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -137,7 +167,6 @@ while True:
         if keys[pygame.K_r]:
             soco = True
         if run_animation and not soco:
-            parado = False
             nova_lista = flip_correndo if virado else frames_correndo
             if nova_lista != gordo_frames:
                 curr_frame = 0
@@ -147,7 +176,6 @@ while True:
                 curr_frame = (curr_frame + 1) % len(gordo_frames)
                 anim_time = 0
         if not run_animation and not soco:
-            parado = True
             nova_lista = flip_parado if virado else frames_parado
             if nova_lista != gordo_frames:
                 curr_frame = 0
@@ -157,7 +185,6 @@ while True:
                 curr_frame = (curr_frame + 1) % len(gordo_frames)
                 anim_time = 0
         if soco:
-            parado = False
             nova_lista = flip_soco if virado else frames_soco
             if nova_lista != gordo_frames:
                 curr_frame = 0
@@ -244,6 +271,9 @@ while True:
     #Colider do personagem com a parede da esquerda
     if pos_x < 0:
         pos_x = old_pos_x
+
+    if pos_x + 64 >= 1280:
+        troca_mapa()
 
     screen.blit(background, (0, 0))
     screen.blit(gordo_frames[curr_frame], (pos_x, pos_y))
