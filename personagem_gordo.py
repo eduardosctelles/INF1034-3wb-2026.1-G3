@@ -90,6 +90,40 @@ tom_no_ar = False
 tom_shake_x = 0
 tom_shake_y = 0
 
+# ---- Cenoura (mapa 2) ----
+try:
+    carrot_sheet = pygame.image.load("Carrot-sheet.png").convert_alpha()
+except FileNotFoundError:
+    carrot_sheet = pygame.Surface((448, 384))
+    carrot_sheet.fill((255, 0, 0))
+
+carrot_walk_frames = [carrot_sheet.subsurface((coluna * 64, linha * 64, 64, 64)) for linha in range(2) for coluna in range(7)]
+
+
+def criar_cenoura():
+    return {"x": 900, "y": GROUND_Y, "inicio_x": 900, "distancia_maxima": 100,
+            "velocidade": 2, "direcao": 1, "frame": 0, "anim_timer": 0, "viva": True}
+
+
+cenoura = criar_cenoura()
+
+# ---- Aipo (mapa 3) ----
+spritesheet_aipo = pygame.image.load('AEvilery-Sheet.png')
+aipo_img = pygame.transform.flip(spritesheet_aipo, True, False)
+curr_frame_aipo = 0
+anim_time_aipo = 0
+aipos = []
+aipos_spawnados = 0
+LIMITE_AIPOS = 3
+
+# ---- Presunto (mapa 3) ----
+presunto_sheet = pygame.image.load("presunto.png").convert_alpha()
+presunto_frames = [presunto_sheet.subsurface((col * 32, 0, 32, 32)) for col in range(3)]
+presunto_frame = 0
+presunto_anim_timer = 0
+presunto_rect = pygame.Rect(1000, 442, 64, 64)
+vitoria = False
+
 
 # Variáveis de tempo (em milissegundos)
 tempo_atual = 0
@@ -130,6 +164,82 @@ def troca_mapa():
         pygame.time.delay(10)
 
 
+def atualiza_cenoura():
+    global game_over
+
+    if not cenoura["viva"]:
+        return
+
+    cenoura["x"] += cenoura["velocidade"] * cenoura["direcao"]
+    if cenoura["x"] >= cenoura["inicio_x"] + cenoura["distancia_maxima"]:
+        cenoura["direcao"] = -1
+    elif cenoura["x"] <= cenoura["inicio_x"] - cenoura["distancia_maxima"]:
+        cenoura["direcao"] = 1
+
+    cenoura["anim_timer"] += 1
+    if cenoura["anim_timer"] >= 5:
+        cenoura["anim_timer"] = 0
+        cenoura["frame"] = (cenoura["frame"] + 1) % len(carrot_walk_frames)
+
+    cenoura_rect = pygame.Rect(cenoura["x"], cenoura["y"], 64, 64)
+    player_rect = pygame.Rect(pos_x, pos_y, 64, 64)
+    if player_rect.colliderect(cenoura_rect):
+        game_over = True
+
+
+def desenha_cenoura():
+    if not cenoura["viva"]:
+        return
+    frame_img = pygame.transform.scale(carrot_walk_frames[cenoura["frame"]], (128, 128))
+    center_x = cenoura["x"] + 32
+    center_y = cenoura["y"] + 32
+    screen.blit(frame_img, (center_x - 64, center_y - 64))
+
+
+def atualiza_aipos():
+    global curr_frame_aipo, anim_time_aipo, game_over, aipos_spawnados
+
+    for aipo_info in aipos:
+        aipo_info["x"] -= 3
+    aipos[:] = [a for a in aipos if a["x"] > -32]
+    if aipos_spawnados < LIMITE_AIPOS and (len(aipos) == 0 or aipos[-1]["x"] < 300):
+        aipos.append({"x": 1280, "y": GROUND_Y})
+        aipos_spawnados += 1
+
+    anim_time_aipo += dt
+    if anim_time_aipo / 300 > 0.3:
+        curr_frame_aipo += 1
+        if curr_frame_aipo > 10:
+            curr_frame_aipo = 0
+        anim_time_aipo = 0
+
+    player_rect = pygame.Rect(pos_x, pos_y, 64, 64)
+    for aipo_info in aipos:
+        aipo_rect = pygame.Rect(aipo_info["x"], aipo_info["y"], 32, 32)
+        if player_rect.colliderect(aipo_rect):
+            game_over = True
+
+
+def desenha_aipos():
+    for aipo_info in aipos:
+        screen.blit(aipo_img, (aipo_info["x"], aipo_info["y"]), (32 * (curr_frame_aipo % 13) + 64, 0, 32, 32))
+
+
+def atualiza_presunto():
+    global presunto_frame, presunto_anim_timer
+    presunto_anim_timer += dt
+    if presunto_anim_timer >= 200:
+        presunto_anim_timer = 0
+        presunto_frame = (presunto_frame + 1) % len(presunto_frames)
+
+
+def desenha_presunto():
+    frame_img = pygame.transform.scale(presunto_frames[presunto_frame], (96, 96))
+    center_x = presunto_rect.x + 32
+    center_y = presunto_rect.y + 32
+    screen.blit(frame_img, (center_x - 48, center_y - 48))
+
+
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -156,7 +266,7 @@ while True:
     if dt == 16:
         aparece = True
 
-    if not game_over:
+    if not game_over and not vitoria:
         run_animation = False
         if keys[pygame.K_d]:
             pos_x += 2
@@ -200,10 +310,17 @@ while True:
                         colider_soco = pygame.Rect(pos_x - alcance, pos_y, alcance + 64, 64)
                     else:
                         colider_soco = pygame.Rect(pos_x, pos_y, 64 + alcance, 64)
-                    tom_rect = pygame.Rect(tom_x, tom_y, tom_w, tom_h)
-                    if colider_soco.colliderect(tom_rect) and tom_alive:
-                        tom_alive = False
-                        tom_morto_por_soco = True
+                    if cenario == 0:
+                        tom_rect = pygame.Rect(tom_x, tom_y, tom_w, tom_h)
+                        if colider_soco.colliderect(tom_rect) and tom_alive:
+                            tom_alive = False
+                            tom_morto_por_soco = True
+                    if cenario == 1 and cenoura["viva"]:
+                        cenoura_rect = pygame.Rect(cenoura["x"], cenoura["y"], 64, 64)
+                        if colider_soco.colliderect(cenoura_rect):
+                            cenoura["viva"] = False
+                    if cenario == 2:
+                        aipos[:] = [a for a in aipos if not colider_soco.colliderect(pygame.Rect(a["x"], a["y"], 32, 32))]
                 if curr_frame >= len(gordo_frames):
                     curr_frame = 0
                     soco = False
@@ -216,7 +333,7 @@ while True:
                 pos_y = GROUND_Y
                 pulando = False
                 altura = -5
-        if tom_alive and not tom_morto_por_soco:
+        if cenario == 0 and tom_alive and not tom_morto_por_soco:
             if not tom_countdown_started:
                 tom_x += tom_speed * tom_direction
                 if tom_x > tom_start_x + tom_patrol_distance:
@@ -268,6 +385,15 @@ while True:
                     if tom_explosion_frame >= len(explosion_frames):
                         tom_alive = False
 
+        if cenario == 1:
+            atualiza_cenoura()
+
+        if cenario == 2:
+            atualiza_aipos()
+            atualiza_presunto()
+            if pygame.Rect(pos_x, pos_y, 64, 64).colliderect(presunto_rect):
+                vitoria = True
+
     #Colider do personagem com a parede da esquerda
     if pos_x < 0:
         pos_x = old_pos_x
@@ -283,7 +409,7 @@ while True:
     elif pos_x >= 300:
         passou = True
 
-    if tom_alive:
+    if cenario == 0 and tom_alive:
         if not tom_exploding:
             frame = idle_frames[tom_idle_frame]
             if tom_direction == 1:
@@ -303,6 +429,14 @@ while True:
             tom_center_x = tom_x + tom_w // 2
             tom_center_y = tom_y + tom_h // 2
             screen.blit(frame, (tom_center_x - 110, tom_center_y - 110))
+
+    if cenario == 1:
+        desenha_cenoura()
+
+    if cenario == 2:
+        desenha_aipos()
+        desenha_presunto()
+
     if game_over:
         flash_timer += dt
         alpha = 180 + int(60 * math.sin(flash_timer / 150))
@@ -312,6 +446,10 @@ while True:
         screen.blit(overlay, (0, 0))
         texto_rect = texto_game_over.get_rect(center=(640, 360))
         screen.blit(texto_game_over, texto_rect)
+    elif vitoria:
+        texto_vitoria = font_game_over.render("VITORIA!", True, (0, 200, 0))
+        texto_vitoria_rect = texto_vitoria.get_rect(center=(640, 360))
+        screen.blit(texto_vitoria, texto_vitoria_rect)
     
      # Lógica de exibição sequencial
     if pos_x < 300 and passou == False:
