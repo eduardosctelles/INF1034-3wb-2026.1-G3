@@ -115,6 +115,13 @@ anim_time_aipo = 0
 aipos = []
 aipos_spawnados = 0
 LIMITE_AIPOS = 3
+AIPO_TAMANHO = 48
+AIPO_HITBOX = 26
+AIPO_OFFSET = (AIPO_TAMANHO - AIPO_HITBOX) // 2
+
+
+def aipo_hitbox(aipo_info):
+    return pygame.Rect(aipo_info["x"] + AIPO_OFFSET, aipo_info["y"] + AIPO_OFFSET, AIPO_HITBOX, AIPO_HITBOX)
 
 # ---- Presunto (mapa 3) ----
 presunto_sheet = pygame.image.load("presunto.png").convert_alpha()
@@ -136,6 +143,7 @@ fonte_de_fala3 = texto.render("Queria um presunto...", True, (0, 0, 0))
 
 font_game_over = pygame.font.SysFont('Arial', 100, bold=True)
 texto_game_over = font_game_over.render("HAM OVER", True, (255, 255, 255))
+font_vitoria = pygame.font.SysFont('Arial', 130, bold=True)
 
 
 def troca_mapa():
@@ -215,14 +223,16 @@ def atualiza_aipos():
 
     player_rect = pygame.Rect(pos_x, pos_y, 64, 64)
     for aipo_info in aipos:
-        aipo_rect = pygame.Rect(aipo_info["x"], aipo_info["y"], 32, 32)
+        aipo_rect = aipo_hitbox(aipo_info)
         if player_rect.colliderect(aipo_rect):
             game_over = True
 
 
 def desenha_aipos():
     for aipo_info in aipos:
-        screen.blit(aipo_img, (aipo_info["x"], aipo_info["y"]), (32 * (curr_frame_aipo % 13) + 64, 0, 32, 32))
+        origem = (32 * (curr_frame_aipo % 13) + 64, 0, 32, 32)
+        frame_img = pygame.transform.scale(aipo_img.subsurface(origem), (AIPO_TAMANHO, AIPO_TAMANHO))
+        screen.blit(frame_img, (aipo_info["x"], aipo_info["y"]))
 
 
 def atualiza_presunto():
@@ -238,6 +248,20 @@ def desenha_presunto():
     center_x = presunto_rect.x + 32
     center_y = presunto_rect.y + 32
     screen.blit(frame_img, (center_x - 48, center_y - 48))
+
+
+def registrar_vitoria():
+    try:
+        arquivo = open("contagem_vitorias.txt", "r")
+        contagem = int(arquivo.read().strip())
+        arquivo.close()
+    except (FileNotFoundError, ValueError):
+        contagem = 0
+
+    contagem += 1
+    arquivo = open("contagem_vitorias.txt", "w")
+    arquivo.write(str(contagem))
+    arquivo.close()
 
 
 while True:
@@ -320,7 +344,7 @@ while True:
                         if colider_soco.colliderect(cenoura_rect):
                             cenoura["viva"] = False
                     if cenario == 2:
-                        aipos[:] = [a for a in aipos if not colider_soco.colliderect(pygame.Rect(a["x"], a["y"], 32, 32))]
+                        aipos[:] = [a for a in aipos if not colider_soco.colliderect(aipo_hitbox(a))]
                 if curr_frame >= len(gordo_frames):
                     curr_frame = 0
                     soco = False
@@ -392,6 +416,8 @@ while True:
             atualiza_aipos()
             atualiza_presunto()
             if pygame.Rect(pos_x, pos_y, 64, 64).colliderect(presunto_rect):
+                if not vitoria:
+                    registrar_vitoria()
                 vitoria = True
 
     #Colider do personagem com a parede da esquerda
@@ -447,11 +473,10 @@ while True:
         texto_rect = texto_game_over.get_rect(center=(640, 360))
         screen.blit(texto_game_over, texto_rect)
     elif vitoria:
-        texto_vitoria = font_game_over.render("VITORIA!", True, (0, 200, 0))
+        texto_vitoria = font_vitoria.render("VITÓRIA!", True, (255, 255, 0))
         texto_vitoria_rect = texto_vitoria.get_rect(center=(640, 360))
         screen.blit(texto_vitoria, texto_vitoria_rect)
-    
-     # Lógica de exibição sequencial
+        
     if pos_x < 300 and passou == False:
         if estado == 1:
             screen.blit(fonte_de_fala, (pos_x + 115, 360))
